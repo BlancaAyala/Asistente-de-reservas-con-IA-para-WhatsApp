@@ -1,0 +1,756 @@
+{
+  "name": "Whatsapp - asistente para reservas Restaurante",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.messages[0].type }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "45714b8b-e30d-47a9-b888-ba57170b4456"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bf30794f-b5b5-48b3-b559-f13cea290c06",
+                    "leftValue": "={{ $json.messages[0].type }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        0
+      ],
+      "id": "3c795ffa-d8c4-44c6-9add-ab9cfd7d5ea8",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Eres el Recepcionista Virtual del restaurante Les Truites, un restaurante situado en Pas de la Casa, Andorra.\n\nRecibes un mensaje de WhatsApp de un posible cliente y debes responder de manera cordial y cercana.\n\nReglas:\n\n- Saluda siempre aunque SOLO como respuesta al primer\nmensaje: 'Hola, gracias por escribir al restaurante les Truites. ¿En qué puedo ayudarte hoy?\n\n- Responde dudas con amabilidad y lenguaje cercano.\n\n- Detecta si el usuario quiere preguntar información, reservar, modificar o cancelar una reserva usando palabras clave.\n\n- Nunca repitas mensajes ni hagas bucles.\n\n- Si no entiendes la intención, ofrece solo dos opciones claras: recibir información o realizar una reserva.\n\nContenido del mensaje del usuario si es en texto: {{ $json.messages[0].text.body }}\n\nContenido del mensaje que proviene de un mensaje de audio: {{ $json.content.parts[0].text }}",
+        "options": {
+          "systemMessage": "=Eres el Recepcionista Virtual del restaurante Les Truites.\nRecibes un mensaje de WhatsApp de un cliente y debes responder de manera cordial y cercana.\n\nReglas:\nSaluda siempre solo como respuesta al primer mensaje:\n\"Hola, gracias por escribir al restaurante Les Truites, ¿en qué puedo ayudarte hoy?\"\n\nResponde dudas con amabilidad y lenguaje cercano.\nDetecta si el usuario quiere reservar, modificar o cancelar una reserva usando palabras clave.\nNunca repitas mensajes ni hagas bucles.\n\nSi no entiendes la intención, ofrece solo dos opciones claras:\n→ recibir información\n→ realizar una reserva\n\nContenido del mensaje del usuario: {{ $json.messages[0].text.body }}\n\nIdentidad y Personalidad\nEres Les Truites AI, el asistente virtual del restaurante Les Truites.\nTu tono es cercano, cálido, profesional y amable.\nHablas exclusivamente en español y te comunicas por WhatsApp en formato de chat escrito.\n\nLey del espejo:\nSi el cliente usa “tú” → respondes con “tú”\nSi usa “usted” → respondes con “usted”\nMantén consistencia durante toda la conversación.\n\nTu misión:\nAtender mensajes entrantes de clientes (nuevos o recurrentes).\nDar información sobre el restaurante (menú, horarios, ambiente, ubicación, etc.).\nGestionar reservas: crear, modificar o cancelar.\nGuiar al cliente de forma clara hasta completar la reserva usando el sistema conectado (N8N Calendar Manager).\n\nInformación sobre Les Truites\nTipo de restaurante: Cocina de calidad / tradicional.\nServicios principales:\nComidas y cenas en restaurante\nReservas para grupos\nEventos y celebraciones\nBeneficios clave:\nAmbiente acogedor y cuidado\nCocina de calidad con productos seleccionados\nAtención personalizada\nExperiencia gastronómica agradable\n\nHorarios de atención:\nLunes a Domingo: 13:00 a 15:30 (comida)\nLunes a Domingo: 20:00 a 23:00 (cena)\nHorarios disponibles para reservas (ejemplo):\n13:00, 13:30, 14:00, 14:30, 15:00\n20:00, 20:30, 21:00, 21:30, 22:00\n(No ofrecer horarios fuera de estos rangos)\n\nProtocolo de Conversación\n1. Bienvenida (inbound)\nAdapta tu respuesta:\nSi pide información → explica brevemente el restaurante\nSi solo saluda → da la bienvenida y ofrece ayuda\nIncluye siempre un CTA suave:\n\"¿Te gustaría que revisemos disponibilidad para hacer una reserva?\"\n\nEjemplos:\n\"¡Hola! Gracias por contactar con Les Truites. Ofrecemos una experiencia gastronómica cuidada en un ambiente acogedor. ¿Quieres información o prefieres que te ayude a hacer una reserva?\"\n\"¡Bienvenido/a a Les Truites! 😊 ¿Te gustaría reservar mesa o necesitas información sobre el restaurante?\"\n\n2. Flujo de Reservas\nPaso 1 - Validar intención\nSi el cliente quiere reservar:\n\"Perfecto, podemos gestionar tu reserva. Tenemos disponibilidad en horario de comida y cena. ¿Qué día y hora te vienen mejor?\"\nPaso 2 - Consultar disponibilidad\nCuando el cliente indique fecha y hora:\nUsar Confirmar_disponibilidad\nSi está disponible → continuar\nSi NO está disponible:\n\"Lo siento, ese horario ya está completo. Para ese día tengo disponibles estas opciones: [horas disponibles]. ¿Alguna te encaja?\"\n\nPaso 3 - Recolección de datos (uno a uno)\nPedir SIEMPRE de forma secuencial:\nNombre completo\nNúmero de personas\nTeléfono\nEmail\nConfirmar cada dato antes de pasar al siguiente.\n\nPaso 4 - Confirmación previa\nAntes de cerrar:\n\"Perfecto, te resumo la reserva:\nNombre:\nDía:\nHora:\nPersonas:\nTeléfono:\n¿Está todo correcto para confirmar la reserva?\"\n\nPaso 5 - Crear reserva\nSi confirma:\nUsar Crear_reserva\nUsar Enviar_confirmacion\n\nRespuesta final:\n\"¡Listo! Tu mesa ha quedado reservada para [fecha y hora]. \nTe hemos enviado un correo con todos los detalles. \n¡Te esperamos en Les Truites! 😊\"\n\nGestión de reservas existentes\nSi el cliente ya tiene reserva:\nModificar:\nPedir email + nueva fecha/hora\nUsar Crear_reserva + Enviar_confirmacion\nCancelar:\nPedir email + fecha\nUsar Eliminar_reserva + Enviar_confirmacion\nRespuesta:\n\"Tu reserva ha sido [modificada/cancelada] correctamente. Te hemos enviado un correo con la confirmación.\"\n\nReglas Críticas\nNunca:\nOfrecer horarios fuera del servicio\nConfirmar sin verificar disponibilidad\nPedir varios datos en un solo mensaje\nSiempre:\nConsultar disponibilidad primero\nConfirmar todos los datos antes de cerrar\nEnviar email de confirmación\nMantener tono cercano y profesional\n\nEjemplo inbound\nCliente:\n\"Hola, quiero reservar mañana a las 21:00\"\nBot:\n\"Perfecto, déjame comprobar disponibilidad para mañana a las 21:00. Un momento…\"\n→ (usa Confirmar_disponibilidad)\nBot:\n\"Sí, tenemos disponibilidad 😊\n¿Me indicas tu nombre completo para continuar con la reserva?\"\n\nContexto de Fecha y Hora actual: {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1712,
+        0
+      ],
+      "id": "29651a38-4d34-470d-89be-03893f4f2cf3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        0
+      ],
+      "id": "205d4ae9-a27d-4356-867f-cff6d214b25a",
+      "name": "WhatsApp Trigger",
+      "webhookId": "b212cd41-945b-4a47-8f79-58ff94eec4a1",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "A986fXREKIfmzZ7n",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1584,
+        288
+      ],
+      "id": "e72a702a-42c3-4848-8615-7d9a21e9aa78",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1104,
+        112
+      ],
+      "id": "82f56099-0524-436e-a151-b51c1a52908e",
+      "name": "Transcribir audio",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "xsD5IgOjv89c7PUD",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ JSON.parse($json.messages[0].audio.id).id }}"
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        784,
+        112
+      ],
+      "id": "ec84e220-c3bd-46c2-b63d-f977ac3fc553",
+      "name": "Descargar audio",
+      "webhookId": "72bb9cc5-9a7a-488f-8611-016f48facc9b",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "RDSyDedyplaYxlV7",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "448a19cc-8296-49f1-9d4d-56a4f31ca5b7",
+              "name": "contacts[0].wa_id",
+              "value": "={{ $json.contacts[0].wa_id }}",
+              "type": "string"
+            },
+            {
+              "id": "ad47f74c-dd54-4e43-8c1d-a842f91df59c",
+              "name": "messages[0].id",
+              "value": "={{ $json.messages[0].id }}",
+              "type": "string"
+            },
+            {
+              "id": "86e7ed26-b30f-4d2e-9862-54b9948c9ace",
+              "name": "messages[0].text.body",
+              "value": "={{ $json.messages[0].text.body }}",
+              "type": "string"
+            },
+            {
+              "id": "73aa317e-f7b0-4f19-8580-22666cc1fd62",
+              "name": "messages[0].type",
+              "value": "={{ $json.messages[0].type }}",
+              "type": "string"
+            },
+            {
+              "id": "524f8bf2-15f3-466c-a9a5-15d89e1d58cd",
+              "name": "contacts[0].profile.name",
+              "value": "={{ $json.contacts[0].profile.name }}",
+              "type": "string"
+            },
+            {
+              "id": "70fe3fb1-3568-41ff-a3fe-935f09dccc3d",
+              "name": "metadata.phone_number_id",
+              "value": "={{ $json.metadata.phone_number_id }}",
+              "type": "string"
+            },
+            {
+              "id": "0dcf5c07-aa3d-4cf2-a984-8df72732c4a0",
+              "name": "messages[0].audio.id",
+              "value": "={{ $json.messages[0].audio }}",
+              "type": "string"
+            },
+            {
+              "id": "f6615749-06fe-4531-b3fe-7f24bbec25d9",
+              "name": "messages[0].audio.url",
+              "value": "={{ $json.messages[0].audio.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        0
+      ],
+      "id": "9b5dcb95-b0c8-4e27-890b-1c76f5450e2c",
+      "name": "Extraer variables"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        944,
+        112
+      ],
+      "id": "784a5897-abc9-482b-9b74-d5494cb7fbc9",
+      "name": "Obtener audio",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "07eZlLeHVLrM4jFL",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "520ff270-5043-4df4-abca-18b4ba6bcd9b",
+              "name": "messages[0].text.body",
+              "value": "={{ $json.messages[0].text.body }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        944,
+        -80
+      ],
+      "id": "3989877f-ab98-4d6f-a2da-dd104fd30e99",
+      "name": "Extraer mensaje de texto"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "520ff270-5043-4df4-abca-18b4ba6bcd9b",
+              "name": "messages[0].text.body",
+              "value": "={{ $json.messages[0].text.body }}",
+              "type": "string"
+            },
+            {
+              "id": "2d1d8a3f-020c-43f6-8318-a943505916fb",
+              "name": "content.parts[0].text",
+              "value": "={{ $json.content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1376,
+        0
+      ],
+      "id": "4b80d2bf-bf6d-46b6-850b-9af5674a6617",
+      "name": "Extraer mensaje"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "=979976651873953",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        2176,
+        0
+      ],
+      "id": "b9af7a51-073d-4982-b81b-178a6438633c",
+      "name": "Enviar respuesta",
+      "webhookId": "c09f0b6c-824e-48e1-bb1c-8871db836585",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "RDSyDedyplaYxlV7",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Text message y audio message\nCapaz de entender tanto mensajes de texto como notas de voz en WhatsApp.",
+        "height": 496,
+        "width": 624,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "0f5729c5-eb7f-4297-95d9-efc243c16d04",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6cb0d218-5c93-4fef-acf6-7f89ddde48c5",
+              "leftValue": "={{ $json.messages[0] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        80,
+        0
+      ],
+      "id": "3538af22-b022-4649-9694-9dfed47d2f1d",
+      "name": "Evitar bucles"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "a16c21228b07ef85afe7cfcf690f7704f466ad5d4caf70fd12b9062d10d18475@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Tiempo libre de empleados"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1776,
+        352
+      ],
+      "id": "a2db114c-f734-4e58-bd9f-2aee61b06921",
+      "name": "Crear_reserva",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "wfnt3oxzl3XTyUKA",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "a16c21228b07ef85afe7cfcf690f7704f466ad5d4caf70fd12b9062d10d18475@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Tiempo libre de empleados"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1872,
+        480
+      ],
+      "id": "68989fa6-98d9-465d-8682-a3792830e498",
+      "name": "Eliminar_reserva",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "wfnt3oxzl3XTyUKA",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "a16c21228b07ef85afe7cfcf690f7704f466ad5d4caf70fd12b9062d10d18475@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Tiempo libre de empleados"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Time', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End_Time', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1984,
+        304
+      ],
+      "id": "f66df588-c1e8-4421-bccc-9b20024889e0",
+      "name": "Comprobar_disponibilidad",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "wfnt3oxzl3XTyUKA",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "a16c21228b07ef85afe7cfcf690f7704f466ad5d4caf70fd12b9062d10d18475@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Tiempo libre de empleados"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "updateFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        2144,
+        352
+      ],
+      "id": "cd7288d8-8032-4b9c-abd0-ac3ae322a7d9",
+      "name": "Modificar_reserva",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "wfnt3oxzl3XTyUKA",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        1648,
+        448
+      ],
+      "id": "e6ec76a2-4f78-4f9e-b01d-2fc6f4616b56",
+      "name": "Enviar_confirmacion",
+      "webhookId": "54e71f14-c402-47d6-a10f-2526fc5a463f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0GGw0ikpRoUXkyjC",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1424,
+        288
+      ],
+      "id": "ed60aa42-67e1-465f-b534-2d92197fdef1",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "XtFRvXW2FeDn82fk",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Extraer mensaje de texto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Descargar audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Enviar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Evitar bucles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribir audio": {
+      "main": [
+        [
+          {
+            "node": "Extraer mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar audio": {
+      "main": [
+        [
+          {
+            "node": "Obtener audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer variables": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribir audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer mensaje de texto": {
+      "main": [
+        [
+          {
+            "node": "Extraer mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer mensaje": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evitar bucles": {
+      "main": [
+        [
+          {
+            "node": "Extraer variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear_reserva": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eliminar_reserva": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comprobar_disponibilidad": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modificar_reserva": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar_confirmacion": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8e018d1e-0631-472e-a6df-06d23498b0b8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d6c7347033bcb4a4ff01c7354c466d7bb7ceb055da0638ff9195bafaf52f5ec"
+  },
+  "id": "22kmgMoXY4bZo3ek",
+  "tags": []
+}
